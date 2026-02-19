@@ -26,3 +26,36 @@ I have implemented a **Medallion Architecture** using **Delta Live Tables (DLT)*
 - **DBFS Access Denied**: Encountered `DBFS_DISABLED` errors due to modern security policies.
 
 - **Resolution**: Moved from legacy `dbfs:/` paths to Unity Catalog Volumes `(/Volumes/...)`, aligning the project with 2026 Databricks best practices for security and governance.
+
+---
+
+## Foreign Data Source - Infrastructure & Data Ingestion
+(Supabase Postgresql)
+
+### External Database Integration (Supabase/PostgreSQL):
+
+- **Relational Source**: Provisioned a PostgreSQL instance on Supabase to act as the primary "Source of Truth".
+
+- **Lakehouse Federation**: Implemented Unity Catalog's Federation to query external tables as native Databricks objects.
+
+- **Connection Pooler**: Utilized the Supabase Transaction Pooler (Port 6543) to ensure stable, serverless-compatible connectivity.
+
+- **Foreign Catalog**: Established a `supabase_data` catalog to provide a governed, single pane of glass for relational data.
+
+- **Ingestion Strategy**: Configured a **Triggered Micro-Batch** approach.
+
+---
+
+## Technical Hurdles & Solutions
+
+### Serverless Ingestion Restrictions (SQLSTATE 42000/0A000):
+
+- **Problem**: Attempted raw JDBC ingestion and `readStream` from the Foreign Catalog, both of which are restricted in Serverless/Shared compute environments for security reasons.
+
+- **Resolution**: Pivoted to Lakehouse Federation for governed access and switched from "Continuous Streaming" to "Triggered Micro-Batches." This bypasses connector restrictions while maintaining a near-real-time data flow.
+
+### Networking & Firewall (PSQLException):
+
+- **Problem**: Initial connection attempts failed because the database host was confused with the API URL, and the Supabase firewall blocked inbound Databricks traffic.
+
+- **Resolution**: Whitelisted Databricks IP ranges in the Supabase Network Restrictions and updated the connection to use the IPv4 Pooler Host and project-specific username.
