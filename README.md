@@ -29,6 +29,8 @@ I have implemented a **Medallion Architecture** using **Delta Live Tables (DLT)*
 
 ---
 
+$\quad$
+
 ## Foreign Data Source - Infrastructure & Data Ingestion
 (Supabase Postgresql)
 
